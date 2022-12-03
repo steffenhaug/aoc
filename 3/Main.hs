@@ -15,14 +15,14 @@ badges' groups elves =
 badges = badges' []
 
 priority item
-  | item <> ('A', 'Z') = (ord item) - 38
-  | item <> ('a', 'z') = (ord item) - 96
+  | item <: ('A', 'Z') = (ord item) - 38
+  | item <: ('a', 'z') = (ord item) - 96
   | otherwise = undefined
   where
-    x <> (a, b) = (a <= x) && (x <= b)
+    x <: (a, b) = (a <= x) && (x <= b)
 
 main = do
-  lines <- readlines "test.txt"
+  lines <- readlines "input.txt"
   let b = badges lines
   let p = map priority b
   print (sum p)
