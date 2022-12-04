@@ -2,15 +2,15 @@ import Input
 
 x ∈ (a, b) = (a <= x) && (x <= b)
 
-i `contains` (a, b) = (a ∈ i) && (b ∈ i)
+(a, b) ⊆ i = (a ∈ i) && (b ∈ i)
 
-i `overlaps` (a, b) = (a ∈ i) || (b ∈ i)
+(a, b) ∩ i = (a ∈ i) || (b ∈ i)
 
 count f xs = length (filter f xs)
 
-contained (Assignments a b) = a `contains` b || b `contains` a
+contained (Assignments a b) = a ⊆ b || b ⊆ a
 
-overlapping (Assignments a b) = a `overlaps` b || b `overlaps` a
+overlapping (Assignments a b) = a ∩ b || b ∩ a
 
 one = do
   Right pairs <- input "input.txt"
