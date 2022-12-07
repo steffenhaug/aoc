@@ -1,9 +1,14 @@
 module Input
   ( input,
     Cmd (Cd, Ls),
-    Fs (Dir, Fi)
+    Fs (Dir, File),
+    filename,
+    print_filesystem
   )
 where
+
+import qualified Data.Map as Map
+import Data.Map (Map, fromList, (!))
 
 import Text.ParserCombinators.Parsec
 
@@ -14,9 +19,24 @@ data Cmd
 
 -- File system objects; file or directory.
 data Fs
-  = Dir String
-  | Fi String Int
+  = File String Int
+  | Dir String (Map String Fs)
   deriving (Show)
+
+filename (File name size) = name
+filename (Dir name content) = name
+
+-- Quick and dirty function to inspect the tree.
+print_filesystem :: Fs -> IO ()
+print_filesystem tree = psexpr' 0 tree
+  where
+    psexpr' indent tree =
+      case tree of
+        File name size -> putStrLn $ (replicate indent ' ') ++ name ++ " [" ++ (show size) ++ "]"
+        Dir name children -> do
+          putStrLn $ (replicate indent ' ') ++ name ++ " (dir)"
+          mapM_ (psexpr' (indent + 2)) (Map.elems children)
+
 
 input f = do
   txt <- readFile f
@@ -47,18 +67,15 @@ dirnode = dir <|> file
       string "dir"
       space
       name <- dirname
-      return (Dir name)
+      return (Dir name Map.empty)
     file = do
       size <- nat
       space
-      name <- filename
-      return (Fi name size)
+      name <- many1 $ oneOf ('.' : ['a' .. 'z'])
+      return (File name size)
 
 nat :: Parser Int
 nat = (many1 digit) >>= (return . read)
-
-filename :: Parser String
-filename = many1 $ oneOf ('.' : ['a' .. 'z'])
 
 dirname =
   choice
