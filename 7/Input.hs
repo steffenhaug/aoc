@@ -20,7 +20,7 @@ data Fs
 
 input f = do
   txt <- readFile f
-  let parsed = parse terminal "AoC Input Parser" txt
+  let Right parsed = parse terminal "AoC Input Parser" txt
   return parsed
 
 terminal :: Parser [Cmd]
