@@ -1,6 +1,9 @@
 { pkgs ? import <nixpkgs> {} }:
 let
-    ghc = pkgs.ghc.withPackages(pkg: []);
+    ghc = pkgs.ghc.withPackages(pkg: [
+        pkg.matrix
+        pkg.vector
+    ]);
 in
 pkgs.mkShell {
     # Find locales on Fedora/Debian/Arch/...
