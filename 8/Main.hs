@@ -1,7 +1,8 @@
 import Data.Char (digitToInt)
+import Data.List (findIndex)
+import Data.Matrix (Matrix, mapPos, submatrix, (!))
 import qualified Data.Matrix as Mat
-import Data.Vector (Vector, slice, (!))
-import qualified Data.Vector as Vec
+import Data.Maybe (fromMaybe)
 
 input f = do
   txt <- readFile f
@@ -9,50 +10,46 @@ input f = do
   let trees = map (map digitToInt) ls
   return (Mat.fromLists trees)
 
--- Safe maximum of a vector.
-max' vec
-  | Vec.null vec = minBound
-  | otherwise = Vec.maximum vec
+-- Safe max function.
+max' [] = minBound
+max' xs = maximum xs
 
-visibility mat =
-  let m = Mat.nrows mat
-      n = Mat.ncols mat
-      vis' (i, j) tree =
-        let r = Mat.getRow i mat
-            c = Mat.getCol j mat
-            -- Find the biggest tree in each cardinal direction.
-            north = max' $ (slice 0 (i - 1)) c
-            south = max' $ (slice i (m - i)) c
-            west = max' $ (slice 0 (j - 1)) r
-            east = max' $ (slice j (n - j)) r
-         in or [tree > north, tree > south, tree > west, tree > east]
-   in Mat.mapPos vis' mat
+-- Easy way to add alternative to a Maybe.
+(?) = flip fromMaybe
 
-one = do
-  trees <- input "input.txt"
-  let vis = visibility trees
-  let count = (sum . map fromEnum) (Mat.toList vis)
-  print count
+-- Get the line of sight in every direction from a given tree.
+los mat (i, j) =
+  let u = [mat ! (k, j) | k <- i ↘ 1]
+      d = [mat ! (k, j) | k <- i ↗ m]
+      l = [mat ! (i, k) | k <- j ↘ 1]
+      r = [mat ! (i, k) | k <- j ↗ n]
+   in [u, d, l, r]
+  where
+    a ↘ b = [a - 1, a - 2 .. b]
+    a ↗ b = [a + 1 .. b]
+    m = Mat.ncols mat
+    n = Mat.nrows mat
 
-scenic_score mat =
-  let m = Mat.nrows mat
-      n = Mat.ncols mat
-      vis' (i, j) tree =
-        let r = Mat.getRow i mat
-            c = Mat.getCol j mat
-            score ts =
-              maybe (Vec.length ts) id $
-                fmap (+ 1) (Vec.findIndex (>= tree) ts)
-            -- Find the biggest tree in each cardinal direction.
-            north = score $ Vec.reverse $ (slice 0 (i - 1)) c
-            south = score $ (slice i (m - i)) c
-            west = score $ Vec.reverse $ (slice 0 (j - 1)) r
-            east = score $ (slice j (n - j)) r
-         in north * south * west * east
-   in Mat.mapPos vis' mat
+-- Is the tree at position ij with height aij visible?
+visibility forest ij tree =
+  let surrounding = map max' (los forest ij)
+   in any (< tree) surrounding
 
-two = do
-  trees <- input "input.txt"
-  let score = scenic_score trees
-  let best = maximum (Mat.toList score)
-  print best
+-- The scenic score of the tree at position ij.
+scenic_score forest ij tree =
+  let score ts =
+        let pts = fmap (+ 1) $ findIndex (>= tree) ts
+         in pts ? (length ts)
+      surrounding = map score (los forest ij)
+   in product surrounding
+
+main = do
+  forest <- input "input.txt"
+
+  -- Part one.
+  let visible = mapPos (visibility forest) forest
+  print $ (sum . map fromEnum . Mat.toList) visible
+
+  -- Part two.
+  let scores = mapPos (scenic_score forest) forest
+  print (maximum scores)
