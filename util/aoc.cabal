@@ -1,0 +1,8 @@
+cabal-version: 3.4
+name: aoc
+version: 0.0.1
+license: MIT
+
+library
+    exposed-modules: Aoc
+    build-depends: base

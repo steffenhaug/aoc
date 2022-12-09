@@ -1,6 +1,12 @@
 { pkgs ? import <nixpkgs> {} }:
 let
-    ghc = pkgs.ghc.withPackages(pkg: [
+    # Override the haskell packages to include local libs.
+    hs = pkgs.haskellPackages.extend(self: super: {
+        aoc = self.callPackage ./util/aoc.nix {};
+    });
+
+    ghc = hs.ghcWithPackages(pkg: [
+        pkg.aoc
         pkg.matrix
         pkg.vector
     ]);
@@ -11,6 +17,7 @@ pkgs.mkShell {
 
     nativeBuildInputs = [
         ghc
+        pkgs.cabal2nix
         pkgs.haskell-language-server
     ];
 }
