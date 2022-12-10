@@ -9,6 +9,7 @@ let
         pkg.aoc
         pkg.matrix
         pkg.vector
+        pkg.hip
     ]);
 in
 pkgs.mkShell {
@@ -17,6 +18,7 @@ pkgs.mkShell {
 
     nativeBuildInputs = [
         ghc
+        pkgs.cabal-install
         pkgs.cabal2nix
         pkgs.haskell-language-server
     ];
