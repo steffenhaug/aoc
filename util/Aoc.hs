@@ -18,7 +18,7 @@ natp :: Parser Int
 natp = read <$> many1 digit
 
 -- Print every element of a list.
-printall :: Show a => [a] -> IO ()
+printall :: (Traversable t, Show a) => t a -> IO ()
 printall = mapM_ print
 
 -- Get every N elements of a list.
@@ -43,3 +43,23 @@ plot :: String -> Double -> (Int, Int) -> IntMap (Double, Double, Double) -> IO 
 plot name scale (m, n) pixels = do
   let im = rasterize scale (m, n) pixels
   Im.writeImage name im
+
+-- Invariant: x < y < z.
+max3 :: (Bounded a, Ord a) => [a] -> (a, a, a)
+max3 = max3' (minBound, minBound, minBound)
+  where
+    max3' (x, y, z) [] = (x, y, z)
+    max3' (x, y, z) (t : ts)
+      | z < t = max3' (y, z, t) ts
+      | y < t = max3' (y, t, z) ts
+      | x < t = max3' (t, y, z) ts
+      | otherwise = max3' (x, y, z) ts
+
+max2 :: (Bounded a, Ord a) => [a] -> (a, a)
+max2 = max2' (minBound, minBound)
+  where
+    max2' (x, y) [] = (x, y)
+    max2' (x, y) (t : ts)
+      | y < t = max2' (y, t) ts
+      | x < t = max2' (t, y) ts
+      | otherwise = max2' (x, y) ts
