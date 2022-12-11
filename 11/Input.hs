@@ -15,13 +15,14 @@ monkeyp = do
   n <- do string "Monkey "; n <- natp; string ":\n"; pure n
   items <- itemsp
   op <- operationp
-  test <- testp
+  Test divisor friends <- testp
   pure
     Monkey
       { m_id = n,
         m_items = items,
         m_op = op,
-        m_test = test
+        m_div = divisor,
+        m_friends = friends
       }
 
 itemsp = do
@@ -39,8 +40,8 @@ operationp = do
       ]
   op <-
     choice
-      [ do i <- natp; pure $ Unary (operator i),
-        do string "old"; pure $ Binary operator
+      [ do i <- natp; pure $ (operator i),
+        do string "old"; pure $ (\x -> operator x x)
       ]
   newline
   pure op
@@ -49,22 +50,14 @@ testp = do
   divisor <- do string "  Test: divisible by "; i <- natp; newline; pure i
   iftrue <- do string "    If true: throw to monkey "; m <- natp; newline; pure m
   iffalse <- do string "    If false: throw to monkey "; m <- natp; newline; pure m
-  pure $ Test divisor iftrue iffalse
+  pure $ Test divisor (iftrue, iffalse)
 
 data Monkey = Monkey
   { m_id :: Int,
     m_items :: [Int],
-    m_op :: Op,
-    m_test :: Test
+    m_op :: Int -> Int,
+    m_div :: Int,
+    m_friends :: (Int, Int)
   }
-  deriving (Show)
 
-data Op
-  = Unary (Int -> Int)
-  | Binary (Int -> Int -> Int)
-
-data Test = Test Int Int Int deriving (Show)
-
-instance Show Op where
-  show (Unary _) = "Unary (<fn>)"
-  show (Binary _) = "Binary (<fn>)"
+data Test = Test Int (Int, Int) deriving (Show)

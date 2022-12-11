@@ -63,3 +63,8 @@ max2 = max2' (minBound, minBound)
       | y < t = max2' (y, t) ts
       | x < t = max2' (t, y) ts
       | otherwise = max2' (x, y) ts
+
+
+-- For use with IntMap.alter to maintain a map of counters.
+bump x Nothing = Just x
+bump x (Just n) = Just (n + x)
