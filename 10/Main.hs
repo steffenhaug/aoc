@@ -1,4 +1,4 @@
-import Aoc (intp, printall)
+import Aoc (every, intp, plot, printall, revcat)
 import Control.Monad.State
 import Data.IntMap (IntMap)
 import qualified Data.IntMap as Map
@@ -21,99 +21,72 @@ irp =
 
 data Cpu = Cpu
   { rx :: Int,
-    ir :: Ir,
     pc :: Int
   }
   deriving (Show)
 
 data Crt = Crt
-  { pix :: IntMap Bool,
-    crtw :: Int,
-    crth :: Int
+  { pix :: IntMap (Double, Double, Double),
+    w :: Int,
+    h :: Int
   }
   deriving (Show)
-
-rasterize :: Crt -> Image VU RGB Double
-rasterize Crt {pix = p, crtw = w, crth = h} =
-  Im.scale Im.Nearest Im.Edge (10, 10) $ Im.makeImage (h, w) getpixel
-  where
-    getpixel (i, j) =
-      let lit = Map.findWithDefault False (w * i + j) p
-       in if lit
-            then PixelRGB 0.4 0 0.6
-            else PixelRGB 0 0 0
 
 data Ir
   = Noop
   | Addx Int
   deriving (Show)
 
-revcat xs ys = (reverse xs) ++ ys
-
-every n [] = []
-every n (x : xs) = x : (every n (drop (n - 1) xs))
-
--- Light up a pixel.
-putpixel crt@Crt {pix = p, crtw = w} i j =
-  let p' = Map.insert (w * i + j) True p
-   in crt {pix = p'}
-
--- Calculate the pixel we are over at a civen cycle.
-pixel Crt {crtw = w} cycle = (cycle `div` w, cycle `mod` w)
-
 -- Compute the next state, as well as intermediate states.
-execute :: Ir -> Cpu -> [Cpu]
+execute :: Ir -> Cpu -> (Cpu, [Cpu])
 execute ir (Cpu {rx = x, pc = i}) =
   case ir of
-    Noop ->
-      [ Cpu {rx = x, pc = i + 1, ir = ir}
-      ]
-    Addx dx ->
-      [ Cpu {rx = x, pc = i + 1, ir = ir},
-        Cpu {rx = x + dx, pc = i + 2, ir = ir}
-      ]
+    Noop -> (Cpu {rx = x, pc = i + 1}, [])
+    Addx dx -> (Cpu {rx = x + dx, pc = i + 2}, [Cpu {rx = x, pc = i + 1}])
 
+-- Light up a pixel.
+putpixel crt ij =
+  let buf = pix crt
+      buf' = Map.insert ij (1, 0, 1) buf
+   in crt {pix = buf'}
+
+-- Light up a pixel if rx is close to the cathode ray.
 render :: Crt -> Cpu -> Crt
-render crt@Crt {pix = p, crtw = w} tick@Cpu {rx = x, pc = ij} =
-  let (i, j) = pixel crt ij
-      should_draw = abs (x - j) < 2
-   in if should_draw
-        then putpixel crt i j
+render crt tick@Cpu {rx = x} =
+  let ij = pc tick
+   in if abs (x - ij `mod` w crt) < 2
+        then putpixel crt ij
         else crt
 
 -- Execute one instruction.
-step :: Ir -> State (Crt, [Cpu]) ()
+step :: Ir -> State (Crt, Cpu, [Cpu]) ()
 step ir = do
-  (crt, states) <- get
-  -- Yikes! O(n) to get last state
-  let cpu = last states
-      ticks = execute ir cpu
+  (crt, cpu, hist) <- get
 
-  -- Bug: Currently, the initial state doesnt trigger rendering.
-  let crt' = foldl render crt ticks
+  let (cpu', intmd) = execute ir cpu
+      crt' = foldl render crt (cpu : intmd)
+      past = cpu : hist
 
-  -- Yikes! O(n) append
-  put (crt', states ++ ticks)
+  put (crt', cpu', revcat intmd past)
   pure ()
 
 main = do
   ir <- input "input.txt"
 
-  let cpu = Cpu {rx = 1, pc = 0, ir = Noop}
+  let cpu = Cpu {rx = 1, pc = 0}
       crt =
         Crt
           { pix = Map.empty,
-            crtw = 40,
-            crth = 6
+            w = 40,
+            h = 6
           }
 
-      (crt', trace) = execState (mapM step ir) (crt, [cpu])
+      (crt', cpu', hist) = execState (mapM step ir) (crt, cpu, [])
+      trace = cpu' : hist
 
-      samples = every 40 (drop 19 trace)
+      samples = every 40 (drop 19 (reverse trace))
       signals = zipWith (*) (map rx samples) [20, 60 ..]
 
+  printall samples
   print (sum signals)
-
-  let img = rasterize crt'
-  Im.writeImage "crt.png" img
-
+  plot "crt.png" 10 (h crt', w crt') (pix crt')

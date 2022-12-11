@@ -5,4 +5,4 @@ license: MIT
 
 library
     exposed-modules: Aoc
-    build-depends: base, parsec
+    build-depends: base, parsec, hip, containers
