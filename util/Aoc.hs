@@ -68,3 +68,7 @@ max2 = max2' (minBound, minBound)
 -- For use with IntMap.alter to maintain a map of counters.
 bump x Nothing = Just x
 bump x (Just n) = Just (n + x)
+
+-- Tuple maps
+mapt f (a, b) = (f a, f b)
+mapt3 f (a, b, c) = (f a, f b, f c)
