@@ -1,21 +1,24 @@
 module Aoc where
 
 import Data.IntMap (IntMap)
-import qualified Data.IntMap as IMap
+import qualified Data.IntMap as IM
 import Graphics.Image (Image, Pixel (PixelRGB), RGB, VU, makeImage)
 import qualified Graphics.Image as Im
 import Text.ParserCombinators.Parsec
 
 -- Parse an integer with an optional minus sign.
-intp :: Parser Int
-intp = do
+int :: Parser Int
+int = do
   sign <- option ' ' (char '-')
   digs <- many1 digit
   return $ read (sign : digs)
 
 -- Parse a natural number.
-natp :: Parser Int
-natp = read <$> many1 digit
+nat :: Parser Int
+nat = read <$> many1 digit
+
+parselines :: Parser a -> String -> Either ParseError [a]
+parselines p = parse (sepEndBy1 p newline) "Parse Lines"
 
 -- Print every element of a list.
 printall :: (Traversable t, Show a) => t a -> IO ()
@@ -36,7 +39,7 @@ rasterize scale (m, n) pixels =
     Im.makeImage (m, n) getpixel
   where
     getpixel (i, j) =
-      let (r, g, b) = IMap.findWithDefault (0, 0, 0) (n * i + j) pixels
+      let (r, g, b) = IM.findWithDefault (0, 0, 0) (n * i + j) pixels
        in (PixelRGB r g b)
 
 plot :: String -> Double -> (Int, Int) -> IntMap (Double, Double, Double) -> IO ()
@@ -64,11 +67,15 @@ max2 = max2' (minBound, minBound)
       | x < t = max2' (t, y) ts
       | otherwise = max2' (x, y) ts
 
-
 -- For use with IntMap.alter to maintain a map of counters.
 bump x Nothing = Just x
 bump x (Just n) = Just (n + x)
 
 -- Tuple maps
 mapt f (a, b) = (f a, f b)
+
 mapt3 f (a, b, c) = (f a, f b, f c)
+
+list2 (a, b) = [a, b]
+
+list3 (a, b, c) = [a, b, c]
