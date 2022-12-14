@@ -1,6 +1,7 @@
-import Aoc (list2, nat)
 import Data.List
 import Text.ParserCombinators.Parsec
+
+import Aoc (list2, nat)
 
 input file = do
   txt <- readFile file
@@ -13,15 +14,15 @@ input file = do
       pure (p1, p2)
     packet =
       choice
-        [ I <$> nat,
-          L <$> list
+        [ I <$> nat
+        , L <$> list
         ]
     list = (char '[') *> (packet `sepBy` (char ',')) <* (char ']')
 
 data Packet
   = I Int
   | L [Packet]
-  deriving (Show, Eq)
+  deriving (Eq, Show)
 
 instance Ord Packet where
   -- Rule #1.
@@ -29,15 +30,14 @@ instance Ord Packet where
   -- Rule #2.
   compare (L (l : ls)) (L (r : rs)) =
     case compare l r of
-      EQ -> compare ls rs
-      LT -> LT
-      GT -> GT
+      EQ   -> compare ls rs
+      ineq -> ineq
   compare (L [])      (L (_ : _)) = LT -- Left runs out first.
   compare (L (_ : _)) (L [])      = GT -- Right runs out first.
   compare (L [])      (L [])      = EQ -- They run out at the same time.
   -- Rule #3.
-  compare (I l) (L rs) = compare (L [(I l)]) (L rs)
-  compare (L ls) (I r) = compare (L ls) (L [I r])
+  compare (I l)  (L rs) = compare (L [(I l)]) (L rs)
+  compare (L ls) (I r)  = compare (L ls) (L [I r])
 
 main = do
   Right packets <- input "input.txt"

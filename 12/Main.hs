@@ -1,12 +1,12 @@
-import Aoc
-import Data.Char (ord)
-import qualified Data.List as List
-import Data.Matrix (Matrix, (!))
-import qualified Data.Matrix as Mat
-import Data.Sequence (Seq, ViewL (EmptyL, (:<)), viewl, (><))
+import           Aoc
+import           Data.Char     (ord)
+import qualified Data.List     as List
+import           Data.Matrix   (Matrix, (!))
+import qualified Data.Matrix   as Mat
+import           Data.Sequence (Seq, ViewL (EmptyL, (:<)), viewl, (><))
 import qualified Data.Sequence as Seq
-import Data.Set (Set, intersection, union, (\\))
-import qualified Data.Set as Set
+import           Data.Set      (Set, intersection, union, (\\))
+import qualified Data.Set      as Set
 
 input file = do
   txt <- readFile file
@@ -32,9 +32,9 @@ input file = do
   pure (heightmap, start, end)
 
 data Heightmap = Heightmap
-  { tiles :: Matrix Int,
-    m :: Int,
-    n :: Int
+  { tiles :: Matrix Int
+  , m     :: Int
+  , n     :: Int
   }
   deriving (Show)
 
@@ -50,10 +50,10 @@ elevation chr
 
 neighbors gradient heightmap (i, j) =
   let candidates =
-        [ (i + 1, j),
-          (i - 1, j),
-          (i, j + 1),
-          (i, j - 1)
+        [ (i + 1, j)
+        , (i - 1, j)
+        , (i, j + 1)
+        , (i, j - 1)
         ]
    in Set.fromList $ (filter accessible) (filter (inbounds heightmap) candidates)
   where

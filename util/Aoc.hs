@@ -79,3 +79,6 @@ mapt3 f (a, b, c) = (f a, f b, f c)
 list2 (a, b) = [a, b]
 
 list3 (a, b, c) = [a, b, c]
+
+-- Returns tuples of consecutive pairs in a list.
+pairs xs = zip xs (drop 1 xs)

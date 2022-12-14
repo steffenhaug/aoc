@@ -20,6 +20,7 @@ pkgs.mkShell {
         ghc
         pkgs.cabal-install
         pkgs.cabal2nix
+        pkgs.stylish-haskell
         pkgs.haskell-language-server
     ];
 }
