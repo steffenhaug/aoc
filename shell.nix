@@ -10,6 +10,7 @@ let
         pkg.matrix
         pkg.vector
         pkg.hip
+        pkg.sbv
     ]);
 in
 pkgs.mkShell {
