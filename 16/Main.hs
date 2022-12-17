@@ -2,8 +2,7 @@
 import qualified Data.List as List
 import Data.Map (Map, (!))
 import qualified Data.Map as Map
-import Data.Set (Set)
-import qualified Data.Set as Set
+import Data.Bits
 
 import Control.Monad.State
 import Text.Parsec hiding (State)
@@ -22,7 +21,7 @@ import Aoc (nat)
 
 input file = do
   Right parsed <- fmap (parse valves file) (readFile file)
-  let (vl, el) = unzip parsed
+  let (vl, el) = unzip (List.reverse $ List.sortOn (flow . fst) parsed)
       -- Create fast lookup table of valve data.
       v = Map.fromList $ zip [1..] vl
       n = length v
@@ -89,7 +88,14 @@ floyd_warshall g = g { adj = adj' }
           e_kj <- gets (! (k, j))
           modify $ Map.insert (i, j) (min e_ij (e_ik+e_kj))
 
-search graph t = execState (search' graph t Set.empty 0 (start graph)) Map.empty
+
+-- Bit hacking set implementation:
+type BitSet = Int
+w `not_elem` set   = (1 `shift` w) .&. set == 0
+insert w set       = (1 `shift` w) .|. set
+a `disjoint` b     = a .&. b == 0
+
+search graph t = execState (search' graph t 0 0 (start graph)) Map.empty
   where search' g t open f v
           | t <= 0 = pure ()
           | otherwise = do
@@ -99,15 +105,14 @@ search graph t = execState (search' graph t Set.empty 0 (start graph)) Map.empty
               modify $ Map.alter cache open
 
               -- Visit remaining candidates.
-              let candidates = Map.filter ((/= 0) . flow) (valves g)
-                  bithacking w _ = w `Set.notMember` open
-                  unvisited = Map.filterWithKey bithacking candidates
+              let candidates = Map.filter ((> 0) . flow) (valves g)
+                  unvisited  = Map.filterWithKey (const . (`not_elem` open)) candidates
 
-                  visit :: Int -> State (Map (Set Int) Int) ()
+                  visit :: Int -> State (Map BitSet Int) ()
                   visit u =
                     let t' = t - (adj g ! (v, u)) - 1
                         f' = f + t' * (flow (valves g ! u))
-                     in search' g t' (Set.insert u open) f' u
+                     in search' g t' (insert u open) f' u
 
               mapM_ visit (Map.keys unvisited)
 
@@ -124,6 +129,6 @@ main = do
   let visited = search graph' 26
       release = [v1 + v2 | (s1, v1) <- Map.toList visited
                          , (s2, v2) <- Map.toList visited
-                         , Set.disjoint s1 s2]
+                         , s1 `disjoint` s2]
 
   print $ maximum release
