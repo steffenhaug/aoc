@@ -1,5 +1,31 @@
 open Containers
+include CCIO
 module Queue = CCFQueue
+
+(* Helper functions. *)
+let read ch = CCIO.read_all ch
+let readlines ch = CCIO.read_lines_l ch
+
+module Fmt = struct
+    include CCFormat
+    let list
+        ?(sep = return "; ")
+        ?(a = "[")
+        ?(b = "]")
+        p
+      = CCFormat.within a b (CCFormat.list ~sep:sep p)
+end
+
+
+(* Simple parsing. *)
+let rx str = Re.compile (Re.Pcre.re str)
+
+let ints input =
+  let ints = Re.matches (rx "\d+") input in
+  List.map Int.of_string_exn ints
+
+
+(* Quick and dirty Lexer generator. *)
 
 module type Tag = sig
   type t
