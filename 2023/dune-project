@@ -1,2 +1,9 @@
 (lang dune 3.11)
 (name aoc23)
+
+(generate_opam_files false)
+
+(package
+ (allow_empty)
+ (name aoc23)
+ (depends ocaml dune))

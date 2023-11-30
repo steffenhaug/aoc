@@ -1,0 +1,5 @@
+(dirs :standard \ template) 
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
