@@ -15,7 +15,7 @@ module Re = struct
   include Re
   let compiled str = Re.compile (Re.Pcre.re str)
 
-  let ints_rx = Re.compile (Re.Pcre.re "\\d+")
+  let ints_rx = compiled "\\d+"
   let ints input =
     let ints = Re.matches ints_rx input in
     List.map Int.of_string_exn ints
