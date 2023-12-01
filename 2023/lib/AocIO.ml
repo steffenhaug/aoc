@@ -9,26 +9,31 @@ let readlines ch = CCIO.read_lines_l ch
 
 (* Simple parsing. *)
 
-let rx str = Re.compile (Re.Pcre.re str)
 
-let ints input =
-  let ints = Re.matches (rx "\\d+") input in
-  List.map Int.of_string_exn ints
 
-(** Dirty O(n^2) overlapping regex search *)
-let match_overlapping rx input =
-  let vec = Vector.create () in
-  let rec scan pos =
-    match Re.exec_opt ~pos:pos rx input with
-    | None   -> ()
-    | Some g ->
-      let resume = 1 + Re.Group.start g 0 in
-      let m      =     Re.Group.get   g 0 in
-      Vector.push vec m;
-      scan resume
-  in scan 0;
-  vec
+module Re = struct
+  include Re
+  let compiled str = Re.compile (Re.Pcre.re str)
 
+  let ints_rx = Re.compile (Re.Pcre.re "\\d+")
+  let ints input =
+    let ints = Re.matches ints_rx input in
+    List.map Int.of_string_exn ints
+
+  (** Dirty O(n^2) overlapping regex search *)
+  let match_overlapping rx input =
+    let vec = Vector.create () in
+    let rec scan pos =
+      match Re.exec_opt ~pos:pos rx input with
+      | None   -> ()
+      | Some g ->
+        let resume = 1 + Re.Group.start g 0 in
+        let m      =     Re.Group.get   g 0 in
+        Vector.push vec m;
+        scan resume
+    in scan 0;
+    vec
+end
 
 
 (** Utilities for printing formatted strings. *)

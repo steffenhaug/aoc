@@ -1,21 +1,6 @@
 open Aoc
 open Aoc.IO
 
-let match_overlapping rx input =
-  let vec = Vector.create () in
-  let rec scan pos =
-    match Re.exec_opt ~pos:pos rx input with
-    | None   -> ()
-    | Some g ->
-      let resume = 1 + Re.Group.start g 0 in
-      let m      =     Re.Group.get   g 0 in
-      Vector.push vec m;
-      scan resume
-  in scan 0;
-  vec
-
-let digits = match_overlapping (rx "\\d|one|two|three|four|five|six|seven|eight|nine")
-
 let parse = function
   | "one"   -> "1"
   | "two"   -> "2"
@@ -29,8 +14,9 @@ let parse = function
   | dig     -> dig
 
 let () = 
-  let input = readlines stdin in
-  let digs  = List.map digits input in
+  let lines = readlines stdin in
+  let rx    = Re.compiled "\\d|one|two|three|four|five|six|seven|eight|nine" in
+  let digs  = List.map (Re.match_overlapping rx) lines in
   let nums  = List.map
       (fun digs ->
          let first = Vector.(get digs 0) in
