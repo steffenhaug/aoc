@@ -1,3 +1,5 @@
+include Containers
+
 (* My utility libraries. *)
 module IO = AocIO
 module Graph = AocGraph

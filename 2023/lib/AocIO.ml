@@ -3,11 +3,39 @@ include CCIO
 module Queue = CCFQueue
 
 (* Helper functions. *)
+
 let read ch = CCIO.read_all ch
 let readlines ch = CCIO.read_lines_l ch
 
+(* Simple parsing. *)
+
+let rx str = Re.compile (Re.Pcre.re str)
+
+let ints input =
+  let ints = Re.matches (rx "\\d+") input in
+  List.map Int.of_string_exn ints
+
+(** Dirty O(n^2) overlapping regex search *)
+let match_overlapping rx input =
+  let vec = Vector.create () in
+  let rec scan pos =
+    match Re.exec_opt ~pos:pos rx input with
+    | None   -> ()
+    | Some g ->
+      let resume = 1 + Re.Group.start g 0 in
+      let m      =     Re.Group.get   g 0 in
+      Vector.push vec m;
+      scan resume
+  in scan 0;
+  vec
+
+
+
+(** Utilities for printing formatted strings. *)
 module Fmt = struct
     include CCFormat
+    let _ = set_color_default true
+
     let list
         ?(sep = return "; ")
         ?(a = "[")
@@ -15,14 +43,6 @@ module Fmt = struct
         p
       = CCFormat.within a b (CCFormat.list ~sep:sep p)
 end
-
-
-(* Simple parsing. *)
-let rx str = Re.compile (Re.Pcre.re str)
-
-let ints input =
-  let ints = Re.matches (rx "\d+") input in
-  List.map Int.of_string_exn ints
 
 
 (* Quick and dirty Lexer generator. *)
