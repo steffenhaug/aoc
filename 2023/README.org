@@ -1,2 +1,2 @@
 * Advent of Code 2023
-This year I'll be trying to learr OCaml.
+This year, I'll be trying to learn OCaml.

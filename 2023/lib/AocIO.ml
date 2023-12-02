@@ -20,6 +20,10 @@ module Re = struct
     let ints = Re.matches ints_rx input in
     List.map Int.of_string_exn ints
 
+  let int input = 
+    let i = Re.Group.get (Re.exec ints_rx input) 0 in
+    Int.of_string_exn i
+
   (** Dirty O(n^2) overlapping regex search *)
   let match_overlapping rx input =
     let vec = Vector.create () in
@@ -35,11 +39,25 @@ module Re = struct
     vec
 end
 
+module Str = struct
+  include CCString
+
+  let split ?(at = " ") str = CCString.split ~by:at str
+  let split2 ?(at = " ") str =
+    let before    = CCString.find ~sub:at str in
+    let after     = before + CCString.length at in
+    let remaining = CCString.length str - after in
+
+    let before = CCString.sub str 0 before in
+    let after  = CCString.sub str after remaining in
+
+    before, after
+end
+
 
 (** Utilities for printing formatted strings. *)
 module Fmt = struct
     include CCFormat
-    let _ = set_color_default true
 
     let list
         ?(sep = return "; ")
@@ -59,7 +77,7 @@ module type Tag = sig
   val pp : Format.formatter -> t -> unit
 end
 
-module Tokenizer(T: Tag) = struct
+module Yak(T: Tag) = struct
   open Re
   open Containers
   open Result.Infix
@@ -81,18 +99,12 @@ module Tokenizer(T: Tag) = struct
   (** Check if a token has a given tag. *)
   let is tag tok = T.equal tok.tag tag
 
-  (** Check if a token option has a given tag. *)
-  let is' tag tok = 
-    match tag, tok with
-    | None, None         -> true
-    | Some tag, Some tok -> is tag tok
-    | _                  -> false
-
+  (** Turn a string into a token stream. *)
   let tokenize input =
-    let input  = Queue.of_list (Re.all lexer_rx input) in
+    let input  = Re.all lexer_rx input in
 
     (* Extract token information from the lexed input. *)
-    let tokens = Queue.map
+    let tokens = List.map
         (fun group ->
            let str = Re.Group.get group 0 in
            let pos = Re.Group.start group 0 in
@@ -101,33 +113,14 @@ module Tokenizer(T: Tag) = struct
         input
     in
 
-    ref tokens
+    Seq.of_list tokens
 
-  let peek input = Queue.first !input
+  type input = token Seq.t
+  type 'a parser = input -> ('a * input) list
 
-  let next input =
-    match peek input with
-    | None   -> Error "unexpected end of input"
-    | Some t -> Ok t
 
-  let consume input =
-    let+ next = next input in
-    input := Queue.tail !input;
-    next
 
-  let expect tag input =
-    let* tok = consume input in
-    if is tag tok then Ok ()
-    else Error "unexpected token"
 
-  let repeat ?(until = None) parse input =
-    let rec loop els =
-      if is' until (peek input) then
-        Ok els
-      else
-        let* a = parse input in
-        loop (Queue.snoc els a)
-    in
-    let+ elements = (loop Queue.empty) in
-    Queue.to_list elements
+
+
 end

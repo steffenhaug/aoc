@@ -1,0 +1,6 @@
+(executables
+ (names        main)
+ (public_names 2)
+ (preprocess
+  (pps ppx_deriving.eq ppx_deriving.show))
+ (libraries aoc containers containers-data re))
