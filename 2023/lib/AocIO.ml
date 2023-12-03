@@ -14,7 +14,10 @@ let readlines ch = CCIO.read_lines_l ch
 module Re = struct
   include Re
   let compiled str = Re.compile (Re.Pcre.re str)
-
+  let start ?(m=0) g = Group.start g m
+  let stop ?(m=0) g = Group.stop g m
+  let str ?(m=0) g = Group.get g m
+      
   let ints_rx = compiled "\\d+"
   let ints input =
     let ints = Re.matches ints_rx input in
@@ -81,7 +84,8 @@ module Yak(T: Tag) = struct
   open Re
   open Containers
   open Result.Infix
-
+  open Effect
+         
   type token =
     { tag: T.t;
       pos: int;
@@ -115,12 +119,107 @@ module Yak(T: Tag) = struct
 
     Seq.of_list tokens
 
+  (* Parser Combinators *)
+  
   type input = token Seq.t
-  type 'a parser = input -> ('a * input) list
+  type _ Effect.t += Consume : token option Effect.t
+                  |  Peek    : token option Effect.t
+  exception ConsumeEmpty
+  exception UnexpectedToken of token
+  exception UnexpectedEof
+    
+  let run p (input: input) = 
+    let input = ref input in
+    Effect.Deep.match_with p ()
+      { effc = (fun (type a) (eff: a Effect.t) ->
+            match eff with
+            | Consume -> Some (fun (k: (a, _) Effect.Deep.continuation) ->
+                let next = Seq.head !input in
+                input := Seq.tail_exn !input;
+                Effect.Deep.continue k next)
+            | Peek -> Some (fun (k: (a, _) Effect.Deep.continuation) ->
+                let next = Seq.head !input in
+                Effect.Deep.continue k next)
+            | _ -> None);
+        exnc =
+          (function
+            | ConsumeEmpty -> None
+            | e -> raise e);
+        retc = fun v -> Some v;
+      }
+      
+  let run_exn p (input: input) = 
+    let input = ref input in
+    Effect.Deep.match_with p ()
+      { effc = (fun (type a) (eff: a Effect.t) ->
+            match eff with
+            | Consume -> Some (fun (k: (a, _) Effect.Deep.continuation) ->
+                let next = Seq.head !input in
+                input := Seq.tail_exn !input;
+                Effect.Deep.continue k next)
+            | Peek -> Some (fun (k: (a, _) Effect.Deep.continuation) ->
+                let next = Seq.head !input in
+                Effect.Deep.continue k next)
+            | _ -> None);
+        exnc = raise;
+        retc = fun v -> v;
+      }
+      
+  let peek () = perform Peek
+      
+  let next () =
+    match perform Consume with
+    | Some tok -> tok
+    | None     -> raise ConsumeEmpty
 
+  let expect tag =
+    match perform Consume with
+    | Some tok ->
+      if (is tag) tok then
+        ()
+      else raise (UnexpectedToken tok)
+    | None -> raise UnexpectedEof
 
+  let consume tag =
+    match perform Consume with
+    | Some tok ->
+      if (is tag) tok then
+        tok.str
+      else raise (UnexpectedToken tok)
+    | None -> raise UnexpectedEof
 
+  let maybe tag =
+    match perform Consume with
+    | Some tok ->
+      if (is tag) tok then
+        expect tag
+      else ()
+    | None -> ()
 
+  let lookat tag =
+    match perform Peek with
+    | Some tok ->
+      if (is tag) tok then true
+      else false
+    | None -> false
 
+  (* repeat , p
+     works like
+     l ::= p
+         | p, l
+  *)
+  let sepby sep p =
+    let rec loop els =
+      let els' = Queue.snoc els (p ()) in
+      if lookat sep then
+        begin
+          expect sep;
+          loop els'
+        end
+      else
+        els'
+    in 
+    
+    Queue.to_list (loop Queue.empty)
 
 end

@@ -1,5 +1,7 @@
 (dirs :standard \ template) 
 
 (env
-  (dev
-    (flags (:standard -warn-error -A))))
+ (release
+  (ocamlopt_flags (:standard -O3)))
+ (_
+  (flags (:standard -warn-error -A))))

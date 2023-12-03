@@ -2,38 +2,57 @@ open Aoc
 open Aoc.IO
 
 type round = (string, int) Hashtbl.t
+[@@deriving show]
 
 type game =
   { id:     int;
     rounds: round list;
   }
+[@@deriving show]
 
-let ( >> ) g f = fun x -> f (g x)
+module Parser = struct
+  module Tok = struct
+    type t = Game | Int | Color | Colon | Semi | Comma
+    [@@deriving show, eq]
+             
+    let table =
+      [ "Game",           Game;
+        "red|green|blue", Color;
+        ":",              Colon;
+        ",",              Comma;
+        ";",              Semi;
+        "\\d+",           Int;
+      ]
+  end
 
-(* Laying some serious pipe... *)
+  module Yak = Yak(Tok)
+  open Yak
+  open Tok
+      
+  let rec parse line =
+    let tok = Yak.tokenize(line) in
+    Yak.run_exn game tok
+    
+  and game() =
+    expect Game;
+    let id = consume Int in
+    expect Colon;
+    { id     = Re.int id;
+      rounds = rounds();
+    }
 
-let parse =
-  Str.split2 ~at:":" >>
-  (fun (id, rounds) ->
-      let id     = Re.int id in
-      let rounds =
-        rounds |>
-        Str.split ~at:";" |>
-        List.map
-          (Str.trim >>
-           Str.split ~at:"," >>
-           List.map
-             (Str.trim >>
-              Str.split2 >>
-              (fun (i, color) ->
-                 color, Re.int i)) >>
-          Hashtbl.of_list)
-      in
-      { id; rounds })
+  and rounds() = sepby Semi draws
+    
+  and draws() =
+    let draws =
+      sepby Comma
+        (fun () ->
+           let n     = consume Int in
+           let color = consume Color in
+           (color, Re.int n))
+    in Hashtbl.of_list draws
+end
 
-let red = 12
-let green = 13
-let blue = 14
 
 let pow { id; rounds } =
   let rec loop rounds r' g' b' =
@@ -48,10 +67,13 @@ let pow { id; rounds } =
   loop rounds 1 1 1
 
   
-
 let () = 
   let input = readlines stdin in
-  let input = List.map parse input in
-  let powers = List.map pow input in
-  let sum xs = List.fold_right ( + ) xs 0 in
-  Fmt.(printf "%i\n") (sum powers);
+  try
+    let games = List.map Parser.parse input in
+    let pows = List.map pow games in
+    let sum xs = List.fold_right ( + ) xs 0 in
+    Fmt.(printf "%i\n") (sum pows);     
+  with
+  | Parser.Yak.UnexpectedToken tok ->
+    Fmt.(printf "Unexpected Token %a\n" Parser.Yak.pp_token) tok;
