@@ -7,7 +7,7 @@ w = 1 + i.find("\n")
 # Padding the input removes edge cases!
 pad = "." * (w - 1) + "\n"
 i = 2*pad + i + 2*pad
-# print(i)
+print(i)
 
 
 integer = re.compile(r"\d+")
@@ -30,9 +30,9 @@ for m in numbers:
 print(s)
     
     
+# Part Two
 t0 = time.perf_counter_ns()
 
-# Part Two
 ratios, gears = 0, gear.finditer(i)
 for m in gears:
     # Where is the gear?
