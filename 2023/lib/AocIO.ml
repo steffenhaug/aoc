@@ -45,7 +45,7 @@ end
 module Str = struct
   include CCString
 
-  let split ?(at = " ") str = CCString.split ~by:at str
+  let split ?(at = "\\s+") str = Re.split (Re.compiled at) str
   let split2 ?(at = " ") str =
     let before    = CCString.find ~sub:at str in
     let after     = before + CCString.length at in
@@ -61,14 +61,21 @@ end
 (** Utilities for printing formatted strings. *)
 module Fmt = struct
     include CCFormat
-
+        
     let list
         ?(sep = return "; ")
         ?(a = "[")
         ?(b = "]")
         p
       = CCFormat.within a b (CCFormat.list ~sep:sep p)
-end
+
+    let str = string_quoted
+        
+    let pair
+        ?(sep = return ", ")
+        p p'
+      = CCFormat.within "(" ")" (CCFormat.pair ~sep:sep p p')
+  end
 
 
 (* Quick and dirty Lexer generator. *)
