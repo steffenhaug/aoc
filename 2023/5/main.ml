@@ -41,7 +41,17 @@ let input =
      in
      
      seeds, almanac)
+  
+(* Part Two
+   Strategy:
+   To apply a set of mappings to a set of intervals,
+   we maintain an input stack and an output stack.
 
+   If (a section of) a range is mapped, we push the mapped range to the output stack.
+   If (a section of) a range is unmapped, we push it back to the input stack to
+   try another rule.
+*)
+  
 let () =
   let seeds, almanac = input in
-  Fmt.(printf "%a\n" (list pp_interval)) seeds
+  Fmt.(printf "%a\n" (list pp_interval)) seeds;
