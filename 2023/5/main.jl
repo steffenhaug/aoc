@@ -1,8 +1,9 @@
 i = read(stdin, String)
-seeds, almanac ... = split(i, "\n\n") 
-seeds = [parse(Int, s) for s in split(seeds)[2:end]]
-seeds = collect(zip(seeds[1:2:end], seeds[1:2:end] .+ seeds[2:2:end]))
-almanac = [[(dst=t[1], s0=t[2], e0=t[2]+t[3]) for t in [[parse(Int, digit) for digit in split(line)] for line in split(strip(map), "\n")[2:end]]] for map in almanac]
+s, a ... = split(i, "\n\n") 
+s = [parse(Int, s) for s in split(s)[2:end]]
+
+const seeds = collect(zip(s[1:2:end], s[1:2:end] .+ s[2:2:end]))
+const almanac = [[(dst=t[1], s0=t[2], e0=t[2]+t[3]) for t in [[parse(Int, digit) for digit in split(line)] for line in split(strip(map), "\n")[2:end]]] for map in a]
     
 # Take a single seed, and apply the first applicable map.
 function project!(out, seeds, map)
@@ -35,12 +36,13 @@ function map!(seeds, map)
 end
 
 # Fold everything together
-function p2(seeds, almanac)
+function p2!(seeds, almanac)
     for a in almanac
         seeds = map!(seeds, a)
     end
+    
     return minimum(seeds)[1]
 end
 
-ans = @time p2(seeds, almanac)
+ans = @time p2!(seeds, almanac)
 printstyled(ans, "\n", bold=true, color=:green)
