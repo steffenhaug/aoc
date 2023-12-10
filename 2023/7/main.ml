@@ -8,8 +8,8 @@ type ty =
 [@@deriving show]
 
 type hand =
-  { t: ty;
-    h: int list;
+  { t:   ty;
+    h:   int list;
     bet: int;
   }
 [@@deriving show]
