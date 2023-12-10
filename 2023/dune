@@ -4,4 +4,4 @@
  (release
   (ocamlopt_flags (:standard -O3)))
  (_
-  (flags (:standard -warn-error -A -w -8))))
+  (flags (:standard -warn-error -A -w -8 -w -32 -w -33))))
