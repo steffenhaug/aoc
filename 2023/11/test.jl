@@ -1,3 +1,6 @@
+using Combinatorics
+using StaticArrays
+
 function getinput(f)
     input = reduce(vcat, permutedims.(collect.(readlines(f))))
     m, n = size(input)
@@ -5,13 +8,14 @@ function getinput(f)
     R = Set([i for (i, r) in enumerate(eachrow(input)) if all(r .== '.')])
     C = Set([i for (i, c) in enumerate(eachcol(input)) if all(c .== '.')])
 
-    G = Set{Vector{Int}}()
+    G = Vector{SVector{2, Int}}()
+
     for i = 1:m
         for j = 1:n
             if input[i, j] == '#'
                 Δi = 999_999 * length(R ∩ (1:i))
                 Δj = 999_999 * length(C ∩ (1:j))
-                push!(G, [i + Δi, j + Δj])
+                push!(G, (i + Δi, j + Δj))
             end
         end
     end
@@ -19,33 +23,11 @@ function getinput(f)
     G
 end
 
-galaxies = @time getinput("in.txt");
+const galaxies = @time getinput("in.txt");
 
-# The cartesian product contains too many pairs, however
-#   1. The (G, G) pairs have distance zero for all G
-#   2. The (G, G') pairs are in there exactly twice for all G ≠ G'
-# so in the end, we can just divide the sum of distances
-# in the cartesian product by 2.
-
-function p2()
-    cart = Iterators.product(galaxies, galaxies)
+function p2(G)
     d(v, w) = sum(abs.(v - w)) # l¹ norm
-    s = sum(d(G, G´) for (G, G´) in cart)
-    s ÷ 2
+    sum(d(g₁, g₂) for (g₁, g₂) in combinations(G, 2))
 end
 
-println("Part Two: $(@time p2())")
-
-# %% Print sparse matrix
-M = maximum(g[1] for g in galaxies)
-N = maximum(g[2] for g in galaxies)
-for i = 1:M
-    for j = 1:N
-        if [i, j] in galaxies
-            print('@')
-        else
-            print('•')
-        end
-    end
-    print('\n')
-end
+println("Part Two: $(@time p2(galaxies))")
