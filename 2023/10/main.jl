@@ -59,7 +59,7 @@ length(loop)
 # %% Winding Number
 # The winding number at a point with respect to a curve can be used to
 # find the answer. Since the pipes form a planar graph, we have a slightly
-# easier edge case where the orientation of the curve at a point doesn't
+# simplified problem where the orientation of the curve at a point doesn't
 # matter; we can simply count the number of times a ray eminating from a
 # point crosses the loop.
 
