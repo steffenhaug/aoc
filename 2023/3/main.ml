@@ -35,7 +35,7 @@ let p1 input width =
     List.filter fst |>
     List.map snd in
 
-  Fmt.(printf "Part One: @{<green>%i@}\n") (sum part_nos)
+  Fmt.(pr "Part One: @{<green>%i@}\n") (sum part_nos)
 
                 
 
@@ -69,7 +69,7 @@ let p2 input width =
     (* Calculate the gear ratio. *)
     List.map (fun adj -> product adj) in
   
-  Fmt.(printf "Part Two: @{<green>%i@}\n") (sum surrounding_nos)
+  Fmt.(pr "Part Two: @{<green>%i@}\n") (sum surrounding_nos)
 
 let () = 
   let input = read stdin in
@@ -79,5 +79,4 @@ let () =
   let pad   = (Str.repeat "." (width - 1)) ^ "\n" in
   let input = pad ^ pad ^ input ^ pad ^ pad in
   
-  Fmt.set_color_default true;
   p2 input width;

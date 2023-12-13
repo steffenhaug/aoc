@@ -93,4 +93,4 @@ let () =
   let locs = List.fold_left combine seeds almanac in
   let starts = List.map (fun i -> i.s) locs in
   let minimum = List.fold_left min (List.hd starts) (List.tl starts) in
-  Fmt.(printf "Part Two: @{<Green>%i@}\n") minimum;
+  Fmt.(pr "Part Two: @{<Green>%i@}\n") minimum;

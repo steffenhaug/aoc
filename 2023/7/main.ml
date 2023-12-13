@@ -71,5 +71,5 @@ let () =
                  List.map (fun (bet, rank) -> bet * rank) |>
                  List.fold_left (+) 0 in
 
-  Fmt.(printf "Part Two: @{<Green>%i@}\n") winnings
+  Fmt.(pr "Part Two: @{<Green>%i@}\n") winnings
   

@@ -10,6 +10,16 @@ module List = struct
   include CCList
 
   let range ?(step = 1) a b = CCList.range_by ~step:step a b
+
+  (* https://www2.lib.uchicago.edu/keith/ocaml-class/utils.html *)
+  let transpose ll =
+    let rec transpose' acc = function
+      | [] -> acc
+      | []::_ -> acc
+      | m -> transpose' ((List.map List.hd m)::acc) (List.map List.tl m)
+    in
+    List.rev (transpose' [] ll)
+
 end
 
 (* CC aliases. *)

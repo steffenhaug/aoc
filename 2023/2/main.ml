@@ -73,7 +73,7 @@ let () =
     let games = List.map Parser.parse input in
     let pows = List.map pow games in
     let sum xs = List.fold_right ( + ) xs 0 in
-    Fmt.(printf "%i\n") (sum pows);     
+    Fmt.(pr "%i\n") (sum pows);     
   with
   | Parser.Yak.UnexpectedToken tok ->
-    Fmt.(printf "Unexpected Token %a\n" Parser.Yak.pp_token) tok;
+    Fmt.(pr "Unexpected Token %a\n" Parser.Yak.pp_token) tok;

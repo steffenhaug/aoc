@@ -60,22 +60,8 @@ end
 
 (** Utilities for printing formatted strings. *)
 module Fmt = struct
-    include CCFormat
-        
-    let list
-        ?(sep = return "; ")
-        ?(a = "[")
-        ?(b = "]")
-        p
-      = CCFormat.within a b (CCFormat.list ~sep:sep p)
-
-    let str = string_quoted
-        
-    let pair
-        ?(sep = return ", ")
-        p p'
-      = CCFormat.within "(" ")" (CCFormat.pair ~sep:sep p p')
-  end
+  include Fmt
+end
 
 
 (* Quick and dirty Lexer generator. *)
@@ -98,7 +84,7 @@ module Yak(T: Tag) = struct
       pos: int;
       str: string;
     }
-  [@@deriving show, eq]
+  [@@deriving show { with_path = false }, eq]
 
   (* Compile the regexes we need. *)
   let rx_table, lexer_rx =

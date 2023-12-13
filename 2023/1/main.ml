@@ -28,7 +28,6 @@ let parse = function
   | dig     -> dig
 
 let () = 
-  Fmt.set_color_default true;
   let lines = readlines stdin in
   let rx    = Re.compiled "\\d|one|two|three|four|five|six|seven|eight|nine" in
   let digs  = List.map (overlapping rx) lines in
@@ -40,5 +39,5 @@ let () =
       digs
   in
   let sum x = List.fold_right (+) x 0 in 
-  List.iter Fmt.(printf "%i\n") nums;
-  Fmt.(printf "%i\n") (sum nums);
+  List.iter Fmt.(pr "%i\n") nums;
+  Fmt.(pr "%i\n") (sum nums);

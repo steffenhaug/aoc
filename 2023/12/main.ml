@@ -2,7 +2,7 @@ open Aoc
 open Aoc.IO
 
 let input =
-  readlines stdin |>
+  readlines (open_in "in.txt") |>
   List.map
     (fun line ->
        let springs, nums = Str.split2 line in
@@ -73,4 +73,4 @@ let count springs groups =
 let () = 
   let cs = input |> List.map (fun (s, n) -> count s n) in
   let s = List.fold_right (+) cs 0 in
-  Fmt.(printf "Part Two: @{<Green>%i@}\n" s)
+  Fmt.(pr "Part Two: %a @." int s)

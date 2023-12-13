@@ -1,6 +1,8 @@
 open Aoc
 open Aoc.IO
 
-let () = 
-  let input = readlines stdin in
-  List.iter (Fmt.printf "%s\n") input;
+let input = readlines (open_in "test.txt") |>
+            List.map (fun l -> Re.ints l)
+
+let () = Fmt.(pr "Part One: %a\n" (list (list int)) input);
+    
