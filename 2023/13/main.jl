@@ -3,7 +3,6 @@ function getinput(f)
               for g in split(read(f, String), "\n\n")]
 end
 
-
 @views function reflection(G)
     cols = size(G, 2) - 1
     for j = 1:cols
@@ -17,7 +16,6 @@ end
     end
     return 0
 end
-
 
 function p2(G)
     t = 0
