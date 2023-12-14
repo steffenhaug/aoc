@@ -28,16 +28,16 @@ let input =
 (* Part Two *)
 
 let smudgecount ls rs =
-  List.(zip_with Set.symdiff ls rs
-        |> map Set.cardinal
-        |> fold_left (+) 0)
+  List.(zipwith Set.symdiff ls rs
+        |> map Set.cardinality
+        |> sum)
 
 let reflection sets =
   (* Auxillary function that traverses the list with a Zipper. *)
   let rec aux i zip =
     match zip with
     |  _,  []              -> 0
-    | [],  r :: rem        -> aux (i + 1) ([r], rem)
+    | [], (r :: rem)       -> aux (i + 1) ([r], rem)
     | ls, (r :: rem as rs) ->
       if smudgecount ls rs = 1
       then i
@@ -47,12 +47,12 @@ let reflection sets =
 
 let () = 
   let ans =
-    List.(input |>
-          map (fun (v, h) ->
+    List.(input
+          |> map (fun (v, h) ->
               let rv = reflection v in
               let rh = reflection h in
-              max (100 * rv) rh) |>
-          fold (+) 0) in
+              max (100 * rv) rh)
+          |> sum) in
 
   Fmt.(pr "@[Part One: %i@]@." ans);
 

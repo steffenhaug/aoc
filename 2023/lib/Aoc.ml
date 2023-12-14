@@ -10,6 +10,7 @@ module Set = struct
 module Make (Ord : Set.OrderedType) = struct
   include Set.Make(Ord)
   let symdiff s s' = Set.(union (diff s s') (diff s' s))
+  let cardinality = cardinal
 end
 end
 
@@ -18,7 +19,13 @@ module List = struct
   include CCList
 
   let fold = fold_left
-               
+
+  let sum  = fold ( + ) 0
+
+  let prod = fold ( * ) 1
+
+  let all = fold ( && ) true
+
 
   let range ?(step = 1) a b = CCList.range_by ~step:step a b
 
@@ -31,9 +38,15 @@ module List = struct
     in
     List.rev (transpose' [] ll)
 
-  let rec zip_with fn xs ys =
+
+  let rec zipwith fn xs ys =
     match xs, ys with
-    | x :: xs, y :: ys -> (fn x y) :: (zip_with fn xs ys)
+    | x :: xs, y :: ys -> (fn x y) :: (zipwith fn xs ys)
+    | _ -> []
+
+  let rec zip xs ys = 
+    match xs, ys with
+    | x :: xs, y :: ys -> (x, y) :: (zip xs ys)
     | _ -> []
 
 end
@@ -44,6 +57,5 @@ module Deque = CCDeque
 module Format = CCFormat
 let _ = Format.set_color_default true
 
-let sum xs = List.fold_right (+) xs 0
 let ( ** ) b e = Int.pow b e
     
