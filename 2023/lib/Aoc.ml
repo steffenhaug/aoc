@@ -6,8 +6,19 @@ module Graph = AocGraph
 module Z3 = AocZ3
 module Sparse = AocSparse
 
+module Set = struct
+module Make (Ord : Set.OrderedType) = struct
+  include Set.Make(Ord)
+  let symdiff s s' = Set.(union (diff s s') (diff s' s))
+end
+end
+
+
 module List = struct
   include CCList
+
+  let fold = fold_left
+               
 
   let range ?(step = 1) a b = CCList.range_by ~step:step a b
 
@@ -19,6 +30,11 @@ module List = struct
       | m -> transpose' ((List.map List.hd m)::acc) (List.map List.tl m)
     in
     List.rev (transpose' [] ll)
+
+  let rec zip_with fn xs ys =
+    match xs, ys with
+    | x :: xs, y :: ys -> (fn x y) :: (zip_with fn xs ys)
+    | _ -> []
 
 end
 

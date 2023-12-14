@@ -3,6 +3,8 @@ open Aoc.IO
 
 module Set = Set.Make(Int)
 
+(* Input parsing *)
+
 let rocks chs =
   let rec aux i = function
     |      [] -> []
@@ -13,7 +15,7 @@ let rocks chs =
   in Set.of_list (aux 0 chs)
 
 let input =
-  read (open_in "test.txt") |>
+  read (open_in "in.txt") |>
   Str.split ~at:"\n\n" |>
   List.map (fun lines ->
       let lines = lines
@@ -23,51 +25,34 @@ let input =
       let h = List.map rocks (List.transpose lines) in
       v, h)
 
-let mirror ?(trace = false) sets =
-  if trace then Fmt.(pr "BEGIN TRACE\n");
+(* Part Two *)
 
-  let rec aux pre sets =
-    match sets with
-    |      [ ] -> failwith "aux: empty list"
-    |      [s] -> (pre, [s], [s])
-    | s :: rem ->
-      match aux (s :: pre) rem  with
-      | pf,                [ ], st -> (pf, [ ], st)
-      | (s :: pf),  (s' :: sf), st ->
-        if Set.equal s s' then
-          (pf, sf, s :: st)
-        else
-          (pf, s :: st, s :: st)
-  in
+let smudgecount ls rs =
+  List.(zip_with Set.symdiff ls rs
+        |> map Set.cardinal
+        |> fold_left (+) 0)
 
-  let p, s, t = aux [] sets in
-  let n  = List.length sets in
-  let n' = List.length t in
-  let m  = List.length s in
+let reflection sets =
+  (* Auxillary function that traverses the list with a Zipper. *)
+  let rec aux i zip =
+    match zip with
+    |  _,  []              -> 0
+    | [],  r :: rem        -> aux (i + 1) ([r], rem)
+    | ls, (r :: rem as rs) ->
+      if smudgecount ls rs = 1
+      then i
+      else aux (i + 1) (r :: ls, rem) in
 
-  if      List.is_empty s then Some (n - n' / 2)
-  else if List.is_empty p then
-    if m = n then None
-    else          Some ((n - m) / 2)
-  else failwith "can't happen"
-    
+  aux 0 ([], sets)
 
 let () = 
-  let opt = Fmt.(option ~none:(any "•") int) in
-  input |> List.iteri (fun i (v, h) ->
-      let mv = mirror v in
-      let mh = mirror h in
-      let x = 100 * Option.get_or ~default:0 mv in
-      let x = Option.get_or ~default:x mh in
-      Fmt.(pr "@[%i:\t%a\t%a \t-> %i@]@." i opt mv opt mh x));
+  let ans =
+    List.(input |>
+          map (fun (v, h) ->
+              let rv = reflection v in
+              let rh = reflection h in
+              max (100 * rv) rh) |>
+          fold (+) 0) in
 
-  let ans = input |> List.map (fun  (v, h) ->
-      let mv = mirror v in
-      let mh = mirror h in
-      let x = 100 * Option.get_or ~default:0 mv in
-      let x = Option.get_or ~default:x mh in
-      x)
-  in
-  let ans = List.fold_right (+) ans 0 in
   Fmt.(pr "@[Part One: %i@]@." ans);
 
