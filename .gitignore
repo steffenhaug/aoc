@@ -9,6 +9,7 @@ Part2
 
 _build
 
+input.txt
 in.txt
 test.txt
 venv/
