@@ -11,7 +11,6 @@ _build
 
 input.txt
 in.txt
-test.txt
 venv/
 pkgenv/
 
