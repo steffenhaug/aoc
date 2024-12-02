@@ -1,0 +1,4 @@
+name = "Aoc"
+uuid = "00f7edf8-3c01-47a0-9f59-11da6f8952f5"
+authors = ["Steffen Haug <st@haug.codes>"]
+version = "0.1.0"
