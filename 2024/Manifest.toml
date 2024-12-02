@@ -2,16 +2,16 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "0cf9e6467181fe698bd671fe7b3a5cf1055072eb"
-
-[[deps.Aoc]]
-path = "Aoc"
-uuid = "00f7edf8-3c01-47a0-9f59-11da6f8952f5"
-version = "0.1.0"
+project_hash = "c3abc0546f40320e3551d41311037e0f5e07b7bd"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 version = "1.11.0"
+
+[[deps.Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
