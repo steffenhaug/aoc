@@ -1,5 +1,3 @@
-using Base.Threads
-# Input Parsing
 const left, right = eachcol(vcat((parse.(Int, split(line))' for line in readlines(open("input.txt")))...))
 
 sort!(left)
