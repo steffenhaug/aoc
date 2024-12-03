@@ -1,7 +1,7 @@
 const rx = r"(mul|do|don't)\((?:(\d+),(\d+))?\)"
 
 function solve(file)
-  r0 = 0
+  sum = 0
   active = true
 
   for (opcode, imm1, imm2) in eachmatch(rx, read(file, String))
@@ -10,11 +10,12 @@ function solve(file)
     elseif opcode == "do"
       active = true
     elseif opcode == "mul" && active
-      r0 += parse(Int64, imm1) * parse(Int64, imm2)
+      x, y = parse.(Int64, (imm1, imm2))
+      sum += x * y
     end
   end
 
-  return r0
+  return sum
 end
 
 # julia> @time solve("input.txt")
