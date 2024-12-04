@@ -2,7 +2,7 @@
 
 julia_version = "1.11.2"
 manifest_format = "2.0"
-project_hash = "27baf9d993786da37054d6b8f3cba78b887ce1e6"
+project_hash = "698094e8b9be505b0272a1a90181bc8ca905a63f"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -59,6 +59,11 @@ version = "1.2.1"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 version = "1.11.0"
+
+[[deps.IterTools]]
+git-tree-sha1 = "42d5f897009e7ff2cf88db414a389e5ed1bdd023"
+uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
+version = "1.10.0"
 
 [[deps.JuliaSyntax]]
 git-tree-sha1 = "937da4713526b96ac9a178e2035019d3b78ead4a"
