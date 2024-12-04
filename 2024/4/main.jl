@@ -1,5 +1,4 @@
 using LinearAlgebra
-using IterTools
 
 input(file) = reduce(vcat, permutedims.(collect.(readlines(open(file)))))
 
@@ -7,13 +6,13 @@ function part1(board)
   count = 0
   (M, N) = size(board)
 
-  inbounds(i, j) = 1 ≤ i ≤ M && 1 ≤ j ≤ N
+  inbounds(ij) = checkbounds(Bool, board, ij)
 
-  for i in 1:M
-    for j in 1:N
-      for (Δi, Δj) in setdiff(product(-1:1, -1:1), ((0, 0),))
-        idx(n) = (i + n * Δi, j + n * Δj)
-        word = join(board[i, j] for (i, j) in idx.(0:3) if inbounds(i, j))
+  for center in findall(==('X'), board)
+    for direction in CartesianIndices((-1:1, -1:1))
+      indices = [center + direction * offset for offset in 0:3]
+      if all(inbounds(ij) for ij in indices)
+        word = join(board[ij] for ij in indices)
         if word == "XMAS"
           count += 1
         end
@@ -39,3 +38,7 @@ function part2(board)
 
   count
 end
+
+board = input("test.txt")
+println(part1(board))
+println(part2(board))
