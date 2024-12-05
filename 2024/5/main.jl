@@ -7,13 +7,28 @@ function input(file)
   order, pages
 end
 
+middle(v) = v[length(v)÷2+1]
+
 function solve(order, pages)
-  middle(v) = v[length(v)÷2+1]
-  compare(a, b) = [a, b] ∈ order
+  compare(a, b) = [a, b] in order
   iscorrect(page) = issorted(page, lt=compare)
   correct(page) = sort(page, lt=compare)
   p1 = sum(middle(page) for page in pages if iscorrect(page))
   p2 = sum(middle(correct(page)) for page in pages if !iscorrect(page))
+  p1, p2
+end
+
+function donny(order, pages)
+  compare(a, b) = [a, b] in order
+  p1 = p2 = 0
+  for page in pages
+    if issorted(page, lt=compare)
+      p1 += middle(order)
+    else
+      sort!(page, lt=compare)
+      p2 += middle(order)
+    end
+  end
   p1, p2
 end
 
