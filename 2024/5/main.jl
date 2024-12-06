@@ -23,10 +23,9 @@ function donny(order, pages)
   p1 = p2 = 0
   for page in pages
     if issorted(page, lt=compare)
-      p1 += middle(order)
+      p1 += middle(page)
     else
-      sort!(page, lt=compare)
-      p2 += middle(order)
+      p2 += middle(sort(page, lt=compare))
     end
   end
   p1, p2
