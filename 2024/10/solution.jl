@@ -12,7 +12,7 @@ function search(grid, pos)
 
   inbounds(ij) = checkbounds(Bool, grid, ij)
   count = 0
-  
+
   for dir in (north, south, east, west)
     next = pos + dir
     if inbounds(next) && grid[next] == 1 + grid[pos]

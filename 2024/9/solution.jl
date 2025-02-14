@@ -37,7 +37,7 @@ end
 function defrag!(disk)
   N = maximum(disk)
 
-  for id in N : -1 : 1
+  for id in N:-1:1
     segs = segments(disk)
     free = freesegments(disk)
 
